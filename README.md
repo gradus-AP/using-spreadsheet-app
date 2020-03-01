@@ -2,15 +2,15 @@
 
 ## 目標
 
-Googleスプレッドシートをデータベースと見立て操作を行うプログラムを作成する.
+Googleスプレッドシートをデータベースと見立て操作を行うプログラムを作成します.
 
 ## Google Sheets APIクライアントアカウントを作成する.
 
 1. [Google開発者向けサービス](https://console.developers.google.com/apis/dashboard) 
 の上部タブより[プロジェクトの選択] > [新しいプロジェクト]へ進みプロジェクトを作成する.
 
-2. 1で作成したプロジェクト [ダッシュボード]上で[APIとサービスを有効化]をクリックし、
-    [Google Sheets API]を選択し, これを有効化.
+2. 1で作成したプロジェクト [ダッシュボード]上で[APIとサービスを有効化]をクリックしたあと, 
+    **Google Sheets API**を選択し, これを有効化.
 
 ![サービスを有効化](./asset/サービスを有効化.png)
 
@@ -19,7 +19,7 @@ Googleスプレッドシートをデータベースと見立て操作を行う�
 ![Google Sheets API有効化](./asset/Google_Sheets_API有効化.png)
 
 3. 1で作成したプロジェクトの[認証情報]上で[認証情報を作成]>[サービス アカウントの作成]へ進み, 
-    サービスアカウントを作成
+    サービスアカウントを作成.
 
 ![サービスアカウント作成](./asset/サービスアカウント作成.png)
 
@@ -34,7 +34,7 @@ Googleスプレッドシートをデータベースと見立て操作を行う�
 
 npmでjsプロジェクを作成しましょう.
 
-またスプレッドシート操作のため、Google Sheets API v4のjs wrapper[google-spreadsheet](https://www.npmjs.com/package/google-spreadsheet)を同時にinstallします.
+また今回の開発ではスプレッドシート操作のため, Google Sheets API v4のjs wrapper[google-spreadsheet](https://www.npmjs.com/package/google-spreadsheet)を同時にinstallします.
 
 ```Terminal
 npm init -y
@@ -46,10 +46,11 @@ npm i google-spreadsheet
 ## スプレッドシートの情報にアクセスする
 
 サービスアカウントにスプレッドシートの閲覧権限を与えておくことにより, 
-サービスアカウントによる認証ののち、スプレッドシートの情報にアクセスすることができます. 
-(一般ユーザーに公開されているスプレッドシートへのアクセスにはAPIキー認証で十分.)
+サービスアカウントによる認証を行った上でスプレッドシートの情報にアクセスすることができます. 
+(これに対して, 一般ユーザーに公開されているスプレッドシートへのアクセスにはAPIキー認証で十分です.)
 
-以下は, スプレッドシートのキーからタイトルを取得するプログラムになります.
+以下は, 既存のスプレッドシートへの編集権限がサービスアカウントに与えられていることを前提とします. 
+まず手始めに, スプレッドシートのキーからタイトルを取得してみましょう.
 
 - getSpreadsheetTitle.js
 
@@ -84,11 +85,15 @@ getSpreadsheetTitleByKey(SPREADSHEET_KEY)
 
 ## Googleスプレッドシートをデータベースとして使う
 
-Googleスプレッドシートをデータベースとして使う
+以下, Googleスプレッドシートをデータベースとして使うことを想定して次のようなデモを行います. 
 
 1. 空白のスプレッドシートに列名を設定する
 
-`setHeaderRow`メソッドで空白のスプレッドシートに1行目に列名をセットする.
+2. スプレッドシートに対する更新・読み取り・更新・削除処理(**CRUD処理**)
+
+### 1. 空白のスプレッドシートに列名を設定する
+
+[`setHeaderRow`](https://theoephraim.github.io/node-google-spreadsheet/#/classes/google-spreadsheet-worksheet?id=fn-setheaderrow)メソッドはスプレッドシートに1行目に列名を書き込みます.
 
 ```js
 const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -117,9 +122,9 @@ const setHeaderToSpreadsheet = async (spreasheetKey, sheetIndex, headerValues) =
 setHeaderToSpreadsheet(SPREADSHEET_KEY, 0, ['id', 'name', 'age'])
 ```
 
-2. 更新・読み取り・更新・削除処理の実装
+### 2. 更新・読み取り・更新・削除処理の実装
 
-Googleスプレッドシートをデータベースとして利用するため、リソースに対する更新・読み取り・更新・削除(**CRUD処理**)を実装した.
+Googleスプレッドシートをデータベースとして利用するため, リソースに対する更新・読み取り・更新・削除(**CRUD処理**)を実装したものが以下になります.
 
 - spreadSheetService.js 
 
@@ -219,7 +224,6 @@ const CREDIT = require('<認証情報jsonファイルへのパス>')
 const SPREADSHEET_KEY = '<spreadsheetのキー>'
 
 // データを4件追加
-// データを追加
 const insertMany = async () => {
     await spreadSheetService.insert({id:1, name:'John Doe', age:40})
     await spreadSheetService.insert({id:2, name:'Jane Doe', age:30})
@@ -230,7 +234,7 @@ const insertMany = async () => {
 insertMany()
 ```
 
-スプレッドシートの内容が更新される. 
+スプレッドシートの内容が更新されます. 
 
 | id |	name |	age|
 |:---:|:---:|:---:|
@@ -265,7 +269,7 @@ spreadSheetService.select(row => row.age == 30)
 spreadSheetService.updateById(1, {name: 'Tom Doe'})
 ```
 
-スプレッドシートのidが1のユーザーのnameが「Tom Doe」に更新される. 
+スプレッドシートのidが1のユーザーのnameが「Tom Doe」に更新されます. 
 
 | id |	name |	age|
 |:---:|:---:|:---:|
@@ -291,9 +295,11 @@ spreadSheetService.deleteById(4)
 | 2	|Jane Doe| 30|
 | 3 |	山田太郎| 20 |
 
+と, idが4のユーザーが削除されていることが確認できます.
+
 ## さいごに
 
 今回はGoogleスプレッドシートを簡易データベースと見立ててスプレッドシート操作を行うプログラムを作成しました. 
-Googleスプレッドシートをデータベースとして用いてアプリを作成することにより、
-SQLなどの知識がないユーザーでも簡単にデータの取得・レポートかができるというメリットがあります. 
-そのため社内データの蓄積用のアプリケーション開発に用途があるのではと考えています.
+Googleスプレッドシートをデータベースとして用いてアプリを作成することにより, 
+SQLなどの知識がないユーザーでも簡単にデータの取得・レポート作成ができるというメリットがあります. 
+そのため分析を目的としたデータ蓄積用のアプリケーション開発に用途があるのではと考えています.
